@@ -20,6 +20,9 @@ function Home({ setUser  }) {
     <div>
       <h1>Bienvenido a Home</h1>
       <button onClick={handleLogout}>Cerrar sesión</button>
+      <button onClick={() => navigate("/test")}>
+        Iniciar Test de Personalidad
+      </button>
     </div>
   );
 }

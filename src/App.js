@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./components/Login";
 import AuthCallback from "./components/AuthCallback";
 import Home from "./components/Home";
+import Test from "./components/Test";
+import Results from "./components/Results";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -26,6 +28,8 @@ function App() {
         <Route path="/" element={user ? <Home setUser={setUser} /> : <Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback setUser={setUser} />} />
+        <Route path="/test" element={<Test />} />
+        <Route path="/results" element={<Results />} />
       </Routes>
     </Router>
   );

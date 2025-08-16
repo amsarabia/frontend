@@ -4,7 +4,7 @@ import './Login.css';
 const Login = () => {
   const handleGoogleLogin = () => {
     // Redirige al endpoint de tu backend que inicia el flujo OAuth
-    window.location.href = 'http://localhost:8080/api/auth/google/login';
+    window.location.href = 'http://friendsapp.com:8080/api/auth/google/login';
   };
 
   return (

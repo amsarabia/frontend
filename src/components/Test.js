@@ -44,7 +44,7 @@ export default function OceanTest() {
   const dimensionsOrder = Object.keys(OCEAN_INFO);
 
   useEffect(() => {
-    fetch("http://localhost:3100/api/v1/personality/questions") // tu endpoint real
+    fetch("http://friendsapp.com:3100/api/v1/personality/questions") // tu endpoint real
       .then((res) => res.json())
       .then((data) => {
         const grouped = data.reduce((acc, q) => {
@@ -83,7 +83,7 @@ export default function OceanTest() {
 
     console.log(payload)
 
-    fetch("http://localhost:3100/api/v1/personality/answers", {
+    fetch("http://friendsapp.com:3100/api/v1/personality/answers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -159,21 +159,23 @@ export default function OceanTest() {
         ))}
       </div>
 
-      {/* Botón Anterior */}
-      <button
-        onClick={handlePrev}
-        className="mt-8 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      > Anterior categoría
-      </button>
-      {/* Botón siguiente */}
-      <button
-        onClick={handleNext}
-        className="mt-8 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      >
-        {currentDimensionIndex < dimensionsOrder.length - 1
-          ? "Siguiente categoría"
-          : "Finalizar"}
-      </button>
+      <div className="flex items-center space-x-4">
+        {/* Botón Anterior */}
+        <button
+          onClick={handlePrev}
+          className="mt-8 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        > Anterior categoría
+        </button>
+        {/* Botón siguiente */}
+        <button
+          onClick={handleNext}
+          className="mt-8 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          {currentDimensionIndex < dimensionsOrder.length - 1
+            ? "Siguiente categoría"
+            : "Finalizar"}
+        </button>
+      </div>
     </div>
   );
 }

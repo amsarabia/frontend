@@ -14,7 +14,7 @@ export default function Results() {
   }
 
   return (
-    <div>
+    <div class="flex flex-col items-center p-6 max-w-3xl mx-auto">
       <h2>Resultados del Test</h2>
       <p>{state.result.message}</p>
       <button onClick={() => navigate("/")}>Volver al inicio</button>

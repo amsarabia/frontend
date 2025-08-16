@@ -15,7 +15,7 @@ function AuthCallback({ setUser }) {  // Recibe setUser como prop
 
     localStorage.setItem("token", token);
 
-    fetch("http://localhost:8080/api/auth/me", {
+    fetch("http://friendsapp.com:8080/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {

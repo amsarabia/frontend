@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Avatar,
@@ -11,9 +11,33 @@ import {
 } from "@material-tailwind/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { FaHome, FaUserFriends, FaUsers, FaBell, FaBrain } from "react-icons/fa";
+import { fetchProfile } from "../Api";
 
 function Home({ setUser }) {
   const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    let userId = null;
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.user_id != null) userId = Number(payload.user_id);
+      }
+    } catch (e) {}
+    if (userId == null || Number.isNaN(userId)) {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+        if (user && user.id != null) userId = Number(user.id);
+      } catch (e) {}
+    }
+    if (userId == null || Number.isNaN(userId)) return;
+
+    fetchProfile(userId)
+      .then((p) => { if (p) setProfile(p); })
+      .catch((err) => console.error("Error fetching profile:", err));
+  }, []);
 
   // Logout
   const handleLogout = () => {
@@ -31,14 +55,25 @@ function Home({ setUser }) {
 
         <div className="ml-auto flex items-center gap-6">
           {/* Botones con tooltip */}
-          <Tooltip content="Test de Personalidad" placement="bottom">
-            <button
-              onClick={() => navigate("/test")}
-              className="hover:bg-blue-700 p-3 rounded-full transition transform hover:scale-110"
-            >
-              <FaBrain className="text-2xl" />
-            </button>
-          </Tooltip>
+          {profile ? (
+            <Tooltip content="Ver mis resultados" placement="bottom">
+              <button
+                onClick={() => navigate("/results", { state: { result: profile } })}
+                className="hover:bg-blue-700 p-3 rounded-full transition transform hover:scale-110"
+              >
+                <FaBrain className="text-2xl" />
+              </button>
+            </Tooltip>
+          ) : (
+            <Tooltip content="Test de Personalidad" placement="bottom">
+              <button
+                onClick={() => navigate("/test")}
+                className="hover:bg-blue-700 p-3 rounded-full transition transform hover:scale-110"
+              >
+                <FaBrain className="text-2xl" />
+              </button>
+            </Tooltip>
+          )}
 
           <Tooltip content="Inicio" placement="bottom">
             <button className="hover:bg-blue-700 p-3 rounded-full transition transform hover:scale-110">

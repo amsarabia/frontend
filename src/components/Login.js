@@ -1,10 +1,16 @@
 import React from 'react';
 import './Login.css';
 
+const AUTH_MODE = process.env.REACT_APP_AUTH_MODE;
+
 const Login = () => {
   const handleGoogleLogin = () => {
     // Redirige al endpoint de tu backend que inicia el flujo OAuth
     window.location.href = 'http://friendsapp.com:8080/api/auth/google/login';
+  };
+
+  const handleDevLogin = () => {
+    window.location.href = 'http://friendsapp.com:8080/api/auth/dev-login?email=dev@local&name=Dev+User';
   };
 
   return (
@@ -28,6 +34,28 @@ const Login = () => {
             </svg>
             Continuar con Google
           </button>
+
+          {AUTH_MODE === 'dev' && (
+            <button
+              type="button"
+              data-testid="dev-login-btn"
+              onClick={handleDevLogin}
+              className="dev-login-btn"
+              style={{
+                marginTop: '12px',
+                background: '#374151',
+                color: '#fff',
+                padding: '12px 24px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                width: '100%',
+                fontSize: '14px',
+              }}
+            >
+              Entrar como dev (mock)
+            </button>
+          )}
         </div>
         
         <div className="login-footer">

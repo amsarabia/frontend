@@ -3,6 +3,13 @@ export async function fetchQuestions() {
   return res.json();
 }
 
+export async function fetchProfile(userId) {
+  const res = await fetch(`http://friendsapp.com:3100/api/v1/personality/profile/${userId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Profile fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function submitAnswers(answers) {
   const res = await fetch("http://friendsapp.com:3100/api/v1/personality/answers", {
     method: "POST",

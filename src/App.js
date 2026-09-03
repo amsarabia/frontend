@@ -14,12 +14,29 @@ const theme = {
   // Otros valores de tema personalizados...
 }
 
+function isTokenExpired(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return false;
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
 function App() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
+    if (token && isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login?error=session_expired";
+      return;
+    }
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }

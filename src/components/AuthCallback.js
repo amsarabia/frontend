@@ -19,12 +19,19 @@ function AuthCallback({ setUser }) {  // Recibe setUser como prop
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login?error=session_expired");
+          return null;
+        }
         if (!res.ok) throw new Error("Error al obtener datos de usuario");
         return res.json();
       })
       .then(user => {
+        if (!user) return;
         localStorage.setItem("user", JSON.stringify(user));
-        setUser(user);  // Actualiza el estado global del usuario aquí
+        setUser(user);
         navigate("/");
       })
       .catch(err => {

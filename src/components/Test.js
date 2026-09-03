@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Lottie from "lottie-react";
+import { useNavigate } from "react-router-dom";
+import { fetchProfile } from "../Api";
 
 const OCEAN_INFO = {
   O: {
@@ -39,21 +41,57 @@ export default function OceanTest() {
   const [groupedQuestions, setGroupedQuestions] = useState({});
   const [currentDimensionIndex, setCurrentDimensionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null);
 
+  const navigate = useNavigate();
   const dimensionsOrder = Object.keys(OCEAN_INFO);
 
   useEffect(() => {
-    fetch("http://friendsapp.com:3100/api/v1/personality/questions") // tu endpoint real
-      .then((res) => res.json())
-      .then((data) => {
-        const grouped = data.reduce((acc, q) => {
-          if (!acc[q.dimension]) acc[q.dimension] = [];
-          acc[q.dimension].push(q);
-          return acc;
-        }, {});
-        setQuestions(data);
-        setGroupedQuestions(grouped);
+    let userId = null;
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.user_id != null) userId = Number(payload.user_id);
+      }
+    } catch (e) {}
+
+    if (userId == null || Number.isNaN(userId)) {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+        if (user && user.id != null) userId = Number(user.id);
+      } catch (e) {}
+    }
+
+    if (userId == null || Number.isNaN(userId)) {
+      navigate("/login");
+      return;
+    }
+
+    const loadQuestions = () => {
+      fetch("http://friendsapp.com:3100/api/v1/personality/questions")
+        .then((res) => res.json())
+        .then((data) => {
+          const grouped = data.reduce((acc, q) => {
+            if (!acc[q.dimension]) acc[q.dimension] = [];
+            acc[q.dimension].push(q);
+            return acc;
+          }, {});
+          setQuestions(data);
+          setGroupedQuestions(grouped);
+        });
+    };
+
+    fetchProfile(userId)
+      .then((profile) => {
+        if (profile) {
+          navigate("/results", { state: { result: profile } });
+          return;
+        }
+        loadQuestions();
+      })
+      .catch((err) => {
+        console.error("Error checking existing profile:", err);
+        loadQuestions();
       });
   }, []);
 
@@ -71,39 +109,54 @@ export default function OceanTest() {
   const handleNext = () => {
     if (currentDimensionIndex < dimensionsOrder.length - 1) {
       setCurrentDimensionIndex((prev) => prev + 1);
-    } else {
-      console.log("Respuestas finales:", answers);
-       const payload = {
-      user_id: "user123", // Puedes reemplazarlo por el usuario real
+      return;
+    }
+
+    let userId = null;
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.user_id != null) userId = Number(payload.user_id);
+      }
+    } catch (e) {}
+
+    if (userId == null || Number.isNaN(userId)) {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+        if (user && user.id != null) userId = Number(user.id);
+      } catch (e) {}
+    }
+
+    if (userId == null || Number.isNaN(userId)) {
+      navigate("/login");
+      return;
+    }
+
+    const payload = {
+      user_id: userId,
       answers: Object.entries(answers).map(([id, score]) => ({
         question_id: parseInt(id),
         score: parseInt(score)
       }))
     };
 
-    console.log(payload)
-
     fetch("http://friendsapp.com:3100/api/v1/personality/answers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
-      .then(res => res.json())
-      .then(data => setResult(data))
+      .then(res => res.json().then(data => ({ status: res.status, data })))
+      .then(({ status, data }) => {
+        if (status === 409 && data && data.profile) {
+          navigate("/results", { state: { result: data.profile } });
+          return;
+        }
+        navigate("/results", { state: { result: data } });
+      })
       .catch(err => console.error("Error enviando respuestas:", err));
-    }
   };
 
-  if (result) {
-    return (
-      <div style={{ padding: "20px" }}>
-        <h2>Resultados del Test</h2>
-        <p>{result.description}</p>
-        <pre>{JSON.stringify(result.scores, null, 2)}</pre>
-      </div>
-    );
-  }
-  
   const handlePrev = () => {
     if (currentDimensionIndex <= dimensionsOrder.length - 1) {
       setCurrentDimensionIndex((prev) => prev - 1);
